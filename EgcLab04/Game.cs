@@ -144,6 +144,11 @@ public class Game : GameWindow
         // TODO (T3): la clic stânga, obiectul selectat se mută în punctul din lume aflat sub cursor
         //            (folosiți ScreenToWorld; Depth nu se schimbă)
 
+        if (MouseState.IsButtonPressed(MouseButton.Left))
+        {
+            sel.Transform.Position = ScreenToWorld(MouseState.Position);
+        }
+
         // TODO (T4, facultativ): clic dreapta = pivot; tasta P ținută = rotație în jurul pivotului
 
         // --- Camera: tastatura și rotița (secțiunea 6.2) -----------------------------
@@ -224,7 +229,20 @@ public class Game : GameWindow
     private Vector2 ScreenToWorld(Vector2 mousePixels)
     {
         // TODO (T3): pasul 1 (pixel → NDC), apoi pasul 2 (NDC → lume, cu inversa lui view * projection)
-        return Vector2.Zero;
+        // Pasul 1: Pixeli -> NDC
+
+        // T3: Semnul minus (1 - ...) apare deoarece în Window Space originea este în colțul stânga-sus cu Y în jos, iar în NDC originea este în centru cu Y în sus.
+        float ndcX = (2.0f * mousePixels.X / ClientSize.X) - 1.0f;
+        float ndcY = 1.0f - (2.0f * mousePixels.Y / ClientSize.Y);
+
+        // Pasul 2: NDC -> Lume 
+        Vector4 ndcPos = new Vector4(ndcX, ndcY, 0.0f, 1.0f);
+        Matrix4 invVP = Matrix4.Invert(_camera.ViewMatrix * _camera.ProjectionMatrix);
+
+        Vector4 worldPos = ndcPos * invVP;
+
+        return worldPos.Xy;
+       
     }
 
     /// <summary>Tasta R: obiectele revin la transformările inițiale, camera la starea inițială.</summary>
