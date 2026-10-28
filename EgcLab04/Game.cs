@@ -12,7 +12,13 @@ namespace Egc;
 /// o cameră cu matricele view și projection, tastatura și mouse-ul.
 /// </summary>
 public class Game : GameWindow
+
+    
 {
+
+    private Vector2 _pivot = Vector2.Zero;
+    private bool _hasPivot = false;
+
     // Obiecte care NU depind de OpenGL pot fi create imediat.
     private readonly Camera _camera = new();
 
@@ -150,6 +156,37 @@ public class Game : GameWindow
         }
 
         // TODO (T4, facultativ): clic dreapta = pivot; tasta P ținută = rotație în jurul pivotului
+
+        // Clic dreapta stabilește pivotul în punctul din lume sub cursor
+        if (MouseState.IsButtonPressed(MouseButton.Right))
+        {
+            _pivot = ScreenToWorld(MouseState.Position);
+            _hasPivot = true;
+        }
+
+        // Cât timp tasta P este ținută apăsată, obiectul se rotește în jurul pivotului
+        if (_hasPivot && KeyboardState.IsKeyDown(Keys.P))
+        {
+            float pivotRotSpeed = 90.0f * speedMultiplier * dt; // grade
+            float rad = MathHelper.DegreesToRadians(pivotRotSpeed);
+
+            // 1. Translatăm poziția obiectului relativ la pivot
+            Vector2 relPos = sel.Transform.Position - _pivot;
+
+            // 2. Rotim vectorul relativ cu unghiul 'rad' (sens trigonometric)
+            float cos = MathF.Cos(rad);
+            float sin = MathF.Sin(rad);
+
+            Vector2 newRelPos = new Vector2(
+                relPos.X * cos - relPos.Y * sin,
+                relPos.X * sin + relPos.Y * cos
+            );
+
+            // 3. Setăm noua poziție în lume și creștem rotația proprie a obiectului cu același unghi
+            sel.Transform.Position = _pivot + newRelPos;
+            sel.Transform.Rotation += pivotRotSpeed;
+        }
+
 
         // --- Camera: tastatura și rotița (secțiunea 6.2) -----------------------------
 
