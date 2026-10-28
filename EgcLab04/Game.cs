@@ -19,6 +19,9 @@ public class Game : GameWindow
     private Vector2 _pivot = Vector2.Zero;
     private bool _hasPivot = false;
 
+    private Mesh _satMesh = null!;
+    private float _satAngle = 0.0f; // unghiul orbitei în grade
+
     // Obiecte care NU depind de OpenGL pot fi create imediat.
     private readonly Camera _camera = new();
 
@@ -75,6 +78,8 @@ public class Game : GameWindow
                   new Transform2D { Position = new Vector2(2.0f, 1.0f) });
         AddObject("cerc", Shapes.RegularPolygon(64, 0.5f),
                   new Transform2D { Position = new Vector2(0.8f, -0.6f), Depth = 2.0f });
+
+        _satMesh = Shapes.Triangle();
     }
 
     /// <summary>Adaugă un obiect în scenă și reține transformarea lui inițială (pentru tasta R).</summary>
@@ -216,6 +221,10 @@ public class Game : GameWindow
             Title = $"{_baseTitle} | selectat: {_scene[_selected].Name} | proiecție {projection} | FPS: {_lastFrames}";
             _titleDirty = false;
         }
+
+        // T5: O rotație completă (360 grade) la 4 secunde = 90 grade pe secundă
+        _satAngle += 90.0f * dt;
+        _satAngle %= 360.0f;
     }
 
     /// <summary>Apelată la fiecare iterație a buclei: DESENAREA unui cadru.</summary>
@@ -246,6 +255,27 @@ public class Game : GameWindow
 
         // TODO (T5, facultativ): satelitul obiectului selectat
 
+
+        // T5: O rotație completă (360 grade) la 4 secunde = 90 grade pe secundă
+
+        // T5: Când obiectul selectat este scalat, orbita satelitului (distanța de 1.2) este și ea scalată în mod corespunzător (se alungește sau se mărește), deoarece matricea model a satelitului moștenește scalarea părintelui prin înmulțirea localCopil * modelParinte.
+
+        SceneObject selectedObj = _scene[_selected];
+
+        // Transformare locală: scalare cu 0.3, translație la distanța 1.2, apoi rotație cu unghiul orbitei
+        Matrix4 localSat = Matrix4.CreateScale(0.3f) *
+                           Matrix4.CreateTranslation(1.2f, 0.0f, 0.0f) *
+                           Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(_satAngle));
+
+        // Matricea model finală a satelitului
+        Matrix4 satModel = localSat * selectedObj.Transform.ModelMatrix;
+
+        _shader.SetMatrix4("uModel", satModel);
+        _shader.SetColor("uTint", Color4.Yellow);
+        _satMesh.Draw();
+
+
+
         // 5. Afișăm cadrul terminat: back buffer <-> front buffer.
         SwapBuffers();
     }
@@ -258,6 +288,8 @@ public class Game : GameWindow
             obj.Dispose();
         }
         _shader.Dispose();
+
+        _satMesh.Dispose();
 
         base.OnUnload();
     }
