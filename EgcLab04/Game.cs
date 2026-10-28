@@ -102,13 +102,31 @@ public class Game : GameWindow
         float dt = (float)args.Time;
         SceneObject sel = _scene[_selected];
 
-        const float moveSpeed = 2.0f;   // unități de lume pe secundă
+        float speedMultiplier = KeyboardState.IsKeyDown(Keys.LeftShift) ? 3.0f : 1.0f;
+
+        const float baseMoveSpeed = 2.0f;  // unități de lume pe secundă
+        float moveSpeed = baseMoveSpeed * speedMultiplier;
+
         if (KeyboardState.IsKeyDown(Keys.Left))  sel.Transform.Position.X -= moveSpeed * dt;
         if (KeyboardState.IsKeyDown(Keys.Right)) sel.Transform.Position.X += moveSpeed * dt;
         if (KeyboardState.IsKeyDown(Keys.Down))  sel.Transform.Position.Y -= moveSpeed * dt;
         if (KeyboardState.IsKeyDown(Keys.Up))    sel.Transform.Position.Y += moveSpeed * dt;
 
         // TODO (T2): Q / E rotesc obiectul, Z / X îl scalează
+
+        const float rotSpeed = 90.0f;
+        if (KeyboardState.IsKeyDown(Keys.Q)) sel.Transform.Rotation += rotSpeed * speedMultiplier * dt;
+        if (KeyboardState.IsKeyDown(Keys.E)) sel.Transform.Rotation -= rotSpeed * speedMultiplier * dt;
+
+        // T2: Scalarea se face prin înmulțire și nu prin adunare pentru a păstra proporțiile simetrice ale obiectului și pentru a evita scăderea sub 0.
+
+        float scaleFactor = MathF.Pow(1.5f, speedMultiplier * dt);
+        if (KeyboardState.IsKeyDown(Keys.Z)) sel.Transform.Scale /= scaleFactor;
+        if (KeyboardState.IsKeyDown(Keys.X)) sel.Transform.Scale *= scaleFactor;
+
+        // Limitarea scării între 0.1 și 10.0
+        sel.Transform.Scale.X = Math.Clamp(sel.Transform.Scale.X, 0.1f, 10.0f);
+        sel.Transform.Scale.Y = Math.Clamp(sel.Transform.Scale.Y, 0.1f, 10.0f);
 
         if (KeyboardState.IsKeyPressed(Keys.Tab)) _selected = (_selected + 1) % _scene.Count;
         if (KeyboardState.IsKeyPressed(Keys.O))   _camera.IsPerspective = !_camera.IsPerspective;
