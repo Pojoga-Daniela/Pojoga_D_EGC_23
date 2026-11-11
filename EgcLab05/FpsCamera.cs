@@ -95,6 +95,43 @@ public class FpsCamera : Camera
 
         // TODO 5.7 (facultativ): în zbor liber (FreeFly), "forward" este chiar _front,
         //           iar Space urcă și Ctrl stânga coboară (pe axa Y a lumii, WorldUp).
+        // --- P6 (facultativ): Comutare mod Zbor Liber (FreeFly) cu tasta G ------------
+        if (keyboard.IsKeyPressed(Keys.G))
+        {
+            FreeFly = !FreeFly;
+        }
+
+        // --- P5 & P6: Calculul deplasării (W, A, S, D, Space, Ctrl) ------------------
+
+        // Multiplicator de viteză când tasta LeftShift este apăsată
+        float speedMultiplier = keyboard.IsKeyDown(Keys.LeftShift) ? SprintFactor : 1.0f;
+        float currentSpeed = MoveSpeed * speedMultiplier;
+
+        // Direcția "înainte": în modul mers (y = 0) este proiectată pe orizontală; în modul zbor (FreeFly) este chiar direcția de privire
+        Vector3 forward = FreeFly ? _front : Vector3.Normalize(new Vector3(_front.X, 0.0f, _front.Z));
+
+        Vector3 moveDir = Vector3.Zero;
+
+        if (keyboard.IsKeyDown(Keys.W)) moveDir += forward;
+        if (keyboard.IsKeyDown(Keys.S)) moveDir -= forward;
+        if (keyboard.IsKeyDown(Keys.D)) moveDir += _right;
+        if (keyboard.IsKeyDown(Keys.A)) moveDir -= _right;
+
+        // P6 (facultativ): În modul FreeFly, Space urcă și LeftControl coboară pe axa Y
+        if (FreeFly)
+        {
+            if (keyboard.IsKeyDown(Keys.Space)) moveDir += Vector3.UnitY;
+            if (keyboard.IsKeyDown(Keys.LeftControl)) moveDir -= Vector3.UnitY;
+        }
+
+        // Normalizăm vectorul de mișcare pentru ca deplasarea pe diagonală (W + D) să nu fie mai rapidă
+        if (moveDir != Vector3.Zero)
+        {
+            moveDir = Vector3.Normalize(moveDir);
+        }
+
+        // Actualizăm poziția camerei independent de FPS (înmulțind cu dt)
+        _position += moveDir * currentSpeed * dt;
     }
 
     /// <summary>
