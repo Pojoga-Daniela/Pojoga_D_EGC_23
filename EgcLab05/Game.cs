@@ -14,7 +14,11 @@ namespace Egc;
 public class Game : GameWindow
 {
     // Camerele (nu depind de OpenGL, pot fi create imediat).
+
     private readonly FpsCamera _fps = new();
+    //private readonly OrbitCamera _orbit = new(); // <--- ADĂUGAT
+  
+
     // TEMA: aici se adaugă camera orbită (private readonly OrbitCamera _orbit = new();)
     private Camera _active;                        // camera folosită la desenare
 
@@ -123,6 +127,10 @@ public class Game : GameWindow
 
         // TODO 5.8 (facultativ): un cilindru generat procedural, adăugat în scenă
         //           (de exemplu în punctul (-1.5, 0.75, -6)).
+
+        Mesh cylinder = AddMesh(Shapes.Cylinder(0.5f, 1.5f, 16));
+        AddObject("cilindru", cylinder).Transform.Position = new Vector3(-1.5f, 0.75f, -6.0f);
+
     }
 
     private Mesh AddMesh(Mesh mesh)

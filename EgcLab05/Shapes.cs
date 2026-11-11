@@ -221,7 +221,94 @@ public static class Shapes
     public static Mesh Cylinder(float radius, float height, int segments)
     {
         // TODO 5.8 (facultativ): vârfurile și indicii cilindrului; până atunci, o formă goală.
-        return new Mesh(Array.Empty<float>(), Array.Empty<uint>());
+        float halfH = height / 2.0f;
+        int sideVertices = 2 * (segments + 1);
+        int topCapVertices = segments + 2;
+        int bottomCapVertices = segments + 2;
+
+        int totalVertices = sideVertices + topCapVertices + bottomCapVertices;
+        int totalIndices = segments * 6 + segments * 3 + segments * 3;
+
+        var vertices = new float[totalVertices * Mesh.FloatsPerVertex];
+        var indices = new uint[totalIndices];
+
+        int vIdx = 0;
+        int iIdx = 0;
+
+        // 1. Suprafața laterală (rândul de jos y = -halfH, rândul de sus y = +halfH)
+        uint sideStart = 0;
+        for (int j = 0; j <= segments; j++)
+        {
+            float u = (float)j / segments;
+            float angle = u * 2.0f * MathF.PI;
+            float x = radius * MathF.Cos(angle);
+            float z = -radius * MathF.Sin(angle);
+
+            // Vârf jos
+            SetVertex(vertices, vIdx++, x, -halfH, z, u, 0.0f, 0.8f);
+            // Vârf sus
+            SetVertex(vertices, vIdx++, x, halfH, z, u, 1.0f, 0.8f);
+        }
+
+        for (int j = 0; j < segments; j++)
+        {
+            uint bL = sideStart + (uint)(j * 2);
+            uint tL = bL + 1;
+            uint bR = bL + 2;
+            uint tR = bL + 3;
+
+            indices[iIdx++] = bL;
+            indices[iIdx++] = bR;
+            indices[iIdx++] = tR;
+
+            indices[iIdx++] = tR;
+            indices[iIdx++] = tL;
+            indices[iIdx++] = bL;
+        }
+
+        // 2. Capacul de sus (+Y)
+        uint topCenterIdx = (uint)vIdx;
+        SetVertex(vertices, vIdx++, 0, halfH, 0, 0.3f, 0.9f, 0.3f);
+        uint topRingStart = (uint)vIdx;
+
+        for (int j = 0; j <= segments; j++)
+        {
+            float u = (float)j / segments;
+            float angle = u * 2.0f * MathF.PI;
+            float x = radius * MathF.Cos(angle);
+            float z = -radius * MathF.Sin(angle);
+            SetVertex(vertices, vIdx++, x, halfH, z, 0.3f, 0.9f, 0.3f);
+        }
+
+        for (int j = 0; j < segments; j++)
+        {
+            indices[iIdx++] = topCenterIdx;
+            indices[iIdx++] = topRingStart + (uint)j;
+            indices[iIdx++] = topRingStart + (uint)j + 1;
+        }
+
+        // 3. Capacul de jos (-Y)
+        uint bottomCenterIdx = (uint)vIdx;
+        SetVertex(vertices, vIdx++, 0, -halfH, 0, 0.9f, 0.3f, 0.9f);
+        uint bottomRingStart = (uint)vIdx;
+
+        for (int j = 0; j <= segments; j++)
+        {
+            float u = (float)j / segments;
+            float angle = u * 2.0f * MathF.PI;
+            float x = radius * MathF.Cos(angle);
+            float z = -radius * MathF.Sin(angle);
+            SetVertex(vertices, vIdx++, x, -halfH, z, 0.9f, 0.3f, 0.9f);
+        }
+
+        for (int j = 0; j < segments; j++)
+        {
+            indices[iIdx++] = bottomCenterIdx;
+            indices[iIdx++] = bottomRingStart + (uint)j + 1;
+            indices[iIdx++] = bottomRingStart + (uint)j;
+        }
+
+        return new Mesh(vertices, indices);
     }
 
     // =====================================================================================
