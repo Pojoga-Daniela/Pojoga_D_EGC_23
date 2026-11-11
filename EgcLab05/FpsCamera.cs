@@ -64,6 +64,12 @@ public class FpsCamera : Camera
         //               Atenție: pe ecran Y crește în jos, iar pitch pozitiv înseamnă privire în sus.
         //               Apoi limitați pitch-ul la intervalul [-MaxPitch, MaxPitch].
 
+        // 1. Orientarea: mouse-ul modifică yaw și pitch
+        Yaw += mouseDelta.X * MouseSensitivity;
+        Pitch -= mouseDelta.Y * MouseSensitivity; // Semn minus deoarece Y pe ecran crește în jos
+
+        // Limităm pitch-ul la ±89° pentru a evita răsturnarea imaginii (gimbal lock)
+        Pitch = Math.Clamp(Pitch, -MaxPitch, MaxPitch);
 
         UpdateVectors();
 
@@ -99,9 +105,21 @@ public class FpsCamera : Camera
         // TODO 5.5 (b): Front din yaw și pitch (formula din secțiunea 5.2), apoi Right și Up
         //               prin produse vectoriale; toți trei normalizați.
         //               Până atunci camera privește mereu spre -Z.
-        _front = -Vector3.UnitZ;
-        _right = Vector3.UnitX;
-        _up = Vector3.UnitY;
+        // Convertim unghiurile din grade în radiani pentru funcțiile trigonometrice
+        float yawRad = MathHelper.DegreesToRadians(Yaw);
+        float pitchRad = MathHelper.DegreesToRadians(Pitch);
+
+        // Calculăm vectorul direcție front din unghiurile yaw și pitch
+        Vector3 front;
+        front.X = MathF.Cos(yawRad) * MathF.Cos(pitchRad);
+        front.Y = MathF.Sin(pitchRad);
+        front.Z = MathF.Sin(yawRad) * MathF.Cos(pitchRad);
+
+        _front = Vector3.Normalize(front);
+
+        // Calculăm vectorii right și up prin produse vectoriale (cross product)
+        _right = Vector3.Normalize(Vector3.Cross(_front, Vector3.UnitY));
+        _up = Vector3.Normalize(Vector3.Cross(_right, _front));
     }
 
     public override void Reset()
