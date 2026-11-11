@@ -44,9 +44,16 @@ public sealed class KeyframeTrack
         if (_keys.Count == 1) return _keys[0];
 
         // TODO 6.3 (secțiunea 4.2):
-        //   1. position = time / SecondsPerKey, adus în [0, Count) cu %   (de exemplu 1.5)
+        //   1. position = time / SecondsPerKey, adus în [0, Count) cu %   (de exemplu 1.5
+        float position = (time / SecondsPerKey) % _keys.Count;
+        if (position < 0) position += _keys.Count;
+
         //   2. i = partea întreagă (cheia de plecare), u = partea fracționară (cât din drum)
+        int i = (int)position;
+        int nextI = (i + 1) % _keys.Count;
+        float u = position - i;
+
         //   3. Lerp între cheia i și cheia următoare ((i + 1) % Count), cu Ease aplicat pe u
-        return _keys[0];   // provizoriu: valoarea primei chei
+        return Vector3.Lerp(_keys[i], _keys[nextI], Ease(u));
     }
 }
