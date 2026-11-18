@@ -70,6 +70,11 @@ public class Game : GameWindow
         // TEMA: Adăugarea scenei pentru Tema 06
         _scenes.Add(new Egc.Teme.RoataPanoramicaScene());
 
+        _scenes.Add(new LabScene());
+        // TEMA: adăugați aici scena (sau scenele) temei; Tab trece de la o scenă la alta.
+       // _scenes.Add(new Egc.Teme.RoataPanoramicaScene());
+        _scenes.Add(new Egc.Teme.MasinaOrbitaScene());
+
         foreach (Scene scene in _scenes)
         {
             scene.Load(_input);
