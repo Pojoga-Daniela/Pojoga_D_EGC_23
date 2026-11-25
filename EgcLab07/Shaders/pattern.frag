@@ -42,9 +42,8 @@ float gridLines(vec2 p)
   return 1.0 - step(uLineWidth, f.x) * step(uLineWidth, f.y);
 }
 
-//INTREBARE
-//P3: step creează margini dure (fără anti-aliasing); când lățimea dungilor nu se împarte exact la rezoluția
-     în pixeli a panoului, unele dungi acoperă mai mulți centri de pixeli decât altele (aliasing), spre deosebire de smoothstep cu fwidth.
+// INTREBARE P3: step creeaza margini dure (fara anti-aliasing); cand latimea dungilor
+// nu se imparte exact la rezolutia in pixeli a panoului, apare efectul de aliasing.
 
 void main()
 {
