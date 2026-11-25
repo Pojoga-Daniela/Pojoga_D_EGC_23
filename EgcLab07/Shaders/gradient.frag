@@ -23,12 +23,31 @@ void main()
 
    // TODO 7.3 (a): degradeul (sectiunea 5.2)
    //   1. directia: vec2 dir = vec2(cos(radians(uAngle)), sin(radians(uAngle)));
+
+   vec2 dir = vec2(cos(radians(uAngle)), sin(radians(uAngle)));
+   float t = clamp(dot(vUV - 0.5, dir) + 0.5, 0.0, 1.0);
+
    //   2. fractiunea t: proiectia lui (vUV - 0.5) pe dir, plus 0.5, limitata la [0, 1]:
    //        float t = clamp(dot(vUV - 0.5, dir) + 0.5, 0.0, 1.0);
+   
+   if (uSteps >= 2)
+{
+    float n = float(uSteps);
+    t = min(floor(t * n), n - 1.0) / (n - 1.0);
+}
+
    //   3. treptele: daca uSteps >= 2, cu n = float(uSteps):
    //        t = min(floor(t * n), n - 1.0) / (n - 1.0);
+   
+   vec3 color = mix(uColorA, uColorB, t);
+
+
    //   4. culoarea: mix(uColorA, uColorB, t).
+   
+   
    vec3 color = vec3(0.35);
 
     FragColor = vec4(color * vColor, 1.0);
+
+  
 }

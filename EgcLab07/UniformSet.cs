@@ -53,6 +53,16 @@ public sealed class UniformSet
                     break;
                 // TODO 7.2: tratați și tipurile Vector2 (SetVector2), Vector3 (SetVector3)
                 //           și bool (SetInt, cu 1 pentru true și 0 pentru false), după modelul de mai sus.
+                case Vector2 v:
+                    shader.SetVector2(name, v); 
+                    break;
+                case Vector3 v: 
+                    shader.SetVector3(name, v); 
+                    break;
+                case bool b: 
+                    shader.SetInt(name, b ? 1 : 0); 
+                    break;
+
                 default:
                     if (Unsupported.Add(value.GetType()))
                     {
