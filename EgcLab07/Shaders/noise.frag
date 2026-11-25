@@ -27,7 +27,17 @@ float valueNoise(vec2 p)
    //   i = floor(p), f = fract(p); valorile din colturi: a = hash(i), b = hash(i + (1, 0)),
    //   c = hash(i + (0, 1)), d = hash(i + (1, 1)); u = f * f * (3.0 - 2.0 * f);
    //   rezultatul: mix(mix(a, b, u.x), mix(c, d, u.x), u.y).
-   return hash(floor(p));   // deocamdata: o valoare constanta pe fiecare celula
+   
+   vec2 i = floor(p);
+   vec2 f = fract(p);
+   vec2 u = f * f * (3.0 - 2.0 * f);
+
+   float a = hash(i);
+   float b = hash(i + vec2(1.0, 0.0));
+   float c = hash(i + vec2(0.0, 1.0));
+   float d = hash(i + vec2(1.0, 1.0));
+ 
+   return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
 }
 
 // "Fractal Brownian motion": 5 straturi (octave) de zgomot, fiecare de doua ori mai fin si mai slab.
@@ -57,7 +67,9 @@ void main()
    // TODO 7.7 (b): marmura: dungi sinusoidale deformate de zgomot:
    //   float veins = 0.5 + 0.5 * sin(p.x * 3.0 + uTurbulence * fbm(p));
    //   float m = pow(1.0 - veins, 3.0);   // vine subtiri si intense
-   float m = fbm(p);
+    
+    float veins = 0.5 + 0.5 * sin(p.x * 3.0 + uTurbulence * fbm(p));
+    float m = pow(1.0 - veins, 3.0);
     vec3 color = mix(uColorA, uColorB, m);
     FragColor = vec4(color * vColor, 1.0);
 }
