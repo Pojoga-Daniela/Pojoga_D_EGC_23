@@ -1,5 +1,6 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Egc;
 
@@ -151,6 +152,14 @@ public sealed class LabScene : Scene
         //              (după modelul paletei de mai jos).
         _gradient.Uniforms.Set("uColorA", _colorA.Value);
         _gradient.Uniforms.Set("uColorB", _colorB.Value);
+
+        //INTREBARE: De ce trebuie să facem asta în Update și nu doar în Load ?
+        
+        //Load rulează o singură dată la pornire și trimite doar culorile
+        //inițiale. La apăsarea tastei Space,
+        //Tween-urile își schimbă treptat valorile în memoria C# la
+        //fiecare cadru, așa că trebuie retrimise shaderului
+        //din placa video în Update pentru ca tranziția să se vadă.
 
         // P5: C trece la paleta următoare; cele patru uniforme vec3 se schimbă lin.
         if (input.WasPressed(NextPalette))

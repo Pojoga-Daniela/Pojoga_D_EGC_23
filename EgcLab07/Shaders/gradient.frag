@@ -45,7 +45,7 @@ void main()
    //   4. culoarea: mix(uColorA, uColorB, t).
    
    
-   vec3 color = vec3(0.35);
+  
 
     FragColor = vec4(color * vColor, 1.0);
 
